@@ -1,6 +1,6 @@
 
 //BUDGET CONTROLLER
-const budgetController = (function() {
+const budgetController = (() => {
 
      const Expense = function(id, description, value) {
          this.id = id;
@@ -14,9 +14,15 @@ const budgetController = (function() {
         this.value = value;
     };
 
-    const allExpanses = [];
-    const allIncomes = [];
-    const totalExpanses = 0;
+    const calculateTotal = (type) => {
+        let sum = 0;
+        data.allItems[type].forEach(cur => {
+            sum += cur.value;
+        });
+        
+        data.totals[type] = sum;
+
+    };
 
     const data = {
         allItems: {
@@ -26,11 +32,13 @@ const budgetController = (function() {
         totals: {
             exp: 0,
             inc: 0
-        }
+        },
+        budget: 0,
+        procentage: -1
     };
 
     return {
-        addItem: function(type, des, val) {
+        addItem: (type, des, val) => {
             
             let newItem, ID;
 
@@ -54,7 +62,33 @@ const budgetController = (function() {
 
         },
 
-        testing: function() {
+        calculateBudget: () => {
+            //calculate total income and expanses
+            calculateTotal('exp');
+            calculateTotal('inc');
+
+            //calculate the budget: income - expamses
+            data.budget = data.totals.inc - data.totals.exp;
+
+            //calculate the percentage of income that we spent
+            if(data.totals.inc > 0) {
+                data.procentage = Math.round(data.totals.exp / data.totals.inc * 100);
+            } else {
+                data.procentage = -1;
+            }
+
+        },
+
+        getBudget: () => {
+            return {
+                budget: data.budget,
+                totalInc: data.totals.inc,
+                totalExp: data.totals.exp,
+                procentage: data.procentage
+            }
+        },
+
+        testing: () => {
             console.log(data);
         }
     };
@@ -62,7 +96,7 @@ const budgetController = (function() {
 })();
 
 //UI CONTROLLER
-const UIcontroller = (function() {
+const UIcontroller = (() => {
 
     const DOMstrings = {
         inputType: '.add__type',
@@ -74,16 +108,16 @@ const UIcontroller = (function() {
     };
 
     return {
-        getInput: function() {
+        getInput: () => {
 
             return {
                 type: document.querySelector(DOMstrings.inputType).value, // will be either inc or exp
                 description: document.querySelector(DOMstrings.inputDescription).value,
-                value: document.querySelector(DOMstrings.inputValue).value
+                value: parseFloat(document.querySelector(DOMstrings.inputValue).value)
             };
         },
 
-        addListItem: function(obj, type) {
+        addListItem: (obj, type) => {
             let html, newHtml, element;
 
             //Create HTML string with placeholder text
@@ -111,7 +145,20 @@ const UIcontroller = (function() {
                 document.querySelector(element).insertAdjacentHTML('beforeend', newHtml);
         },
 
-        getDOMstrings: function() {
+        clearFields: () => {
+            let fields, fieldsArr;
+            fields = document.querySelectorAll(`${DOMstrings.inputDescription}, ${DOMstrings.inputValue}`);
+
+            fieldsArr = Array.prototype.slice.call(fields);
+
+            fieldsArr.forEach((current, index, array) => {
+                current.value = "";
+            });
+
+            fieldsArr[0].focus();
+        },
+
+        getDOMstrings: () => {
             return DOMstrings;
         }
     };
@@ -120,14 +167,14 @@ const UIcontroller = (function() {
 
 
 //GLOBAL APP CONTROLLER
-const controller = (function(budgetCtrl, UICtrl) {
+const controller = ((budgetCtrl, UICtrl) => {
 
-    const setupEventListeners = function() {
+    const setupEventListeners = () => {
         const DOM = UICtrl.getDOMstrings();
 
         document.querySelector(DOM.inputBtn).addEventListener('click', ctrlAddItem);
 
-        document.addEventListener('keypress', function(event) {
+        document.addEventListener('keypress', (event) => {
         
             if(event.keyCode === 13 || event.which === 13) {
                 ctrlAddItem();
@@ -137,24 +184,43 @@ const controller = (function(budgetCtrl, UICtrl) {
 
     };
 
+    const updateBudget = () => {
+        //1. Calculate the budget
+        budgetCtrl.calculateBudget();
 
+        //2. Return the budget
+        const budget = budgetCtrl.getBudget();
+        
+        //3. Display the budget on the UI
+        console.log(budget);
 
-    const ctrlAddItem = function() {
+    };
+
+    const ctrlAddItem = () => {
         let input, newItem;
         //1. Get the field input data
         input = UICtrl.getInput();
+
+        if(input.description !== "" && !isNaN(input.value) && input.value > 0) {
 
         //2. Add the item to the budet controller
         newItem = budgetCtrl.addItem(input.type, input.description, input.value);
 
         //3. Add the item to the UI
         UICtrl.addListItem(newItem, input.type);
-        //4. Calculate the budget
-        //5. Display the budget on the UI
+
+        //4. Clear the fileds
+        UICtrl.clearFields();
+
+        //5. Calculate and update budget
+        updateBudget();
+
+        }
+
      }
 
      return {
-         init: function() {
+         init: () => {
              console.log('application has started.');
              setupEventListeners();
          }
