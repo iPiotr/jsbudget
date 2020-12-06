@@ -52,7 +52,7 @@ const budgetController = (() => {
             //Create new item based on 'inc' or 'exp' type
             if(type === 'exp') {
                 newItem =  new Expense(ID, des, val);
-            } else if (type === 'inc') {
+            } else if(type === 'inc') {
                 newItem = new Income(ID, des, val);
             }
 
@@ -104,7 +104,11 @@ const UIcontroller = (() => {
         inputValue: '.add__value',
         inputBtn: '.add__btn',
         incomeContainer: '.income__list',
-        expensesContainer: '.expenses__list'
+        expensesContainer: '.expenses__list',
+        budgetLabel: '.budget__value',
+        incomeLabel: '.budget__income--value',
+        expenseLabel: '.budget__expenses--value',
+        procentageLabel: '.budget__expenses--percentage'
     };
 
     return {
@@ -158,6 +162,20 @@ const UIcontroller = (() => {
             fieldsArr[0].focus();
         },
 
+        displayBudget: (obj) => {
+
+            document.querySelector(DOMstrings.budgetLabel).textContent = obj.budget;
+            document.querySelector(DOMstrings.incomeLabel).textContent = obj.totalInc;
+            document.querySelector(DOMstrings.expenseLabel).textContent = obj.totalExp;
+            
+            if(obj.procentage > 0) {
+                document.querySelector(DOMstrings.procentageLabel).textContent = `${obj.procentage}%` ;
+            } else {
+                document.querySelector(DOMstrings.procentageLabel).textContent = '---';
+            }
+
+        },
+
         getDOMstrings: () => {
             return DOMstrings;
         }
@@ -192,7 +210,7 @@ const controller = ((budgetCtrl, UICtrl) => {
         const budget = budgetCtrl.getBudget();
         
         //3. Display the budget on the UI
-        console.log(budget);
+        UICtrl.displayBudget(budget);
 
     };
 
@@ -222,6 +240,12 @@ const controller = ((budgetCtrl, UICtrl) => {
      return {
          init: () => {
              console.log('application has started.');
+             UICtrl.displayBudget({
+                budget: 0,
+                totalInc: 0,
+                totalExp: 0,
+                procentage: -1
+             });
              setupEventListeners();
          }
      }
