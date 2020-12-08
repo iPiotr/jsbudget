@@ -62,6 +62,21 @@ const budgetController = (() => {
 
         },
 
+        deleteItem: (type, id) => {
+            let ids, index;
+
+            ids = data.allItems[type].map((current) => {
+                return current.id; 
+            });
+
+            index = ids.indexOf(id);
+
+            if (index !== -1) {
+                data.allItems[type].splice(index, 1);
+            }
+            
+        },
+
         calculateBudget: () => {
             //calculate total income and expanses
             calculateTotal('exp');
@@ -148,6 +163,11 @@ const UIcontroller = (() => {
                 //Insert the HTML into the DOM
 
                 document.querySelector(element).insertAdjacentHTML('beforeend', newHtml);
+        },
+
+        deleteListItem: (selectorID) => {
+            const el = document.getElementById(selectorID);
+            el.parentNode.removeChild(el);
         },
 
         clearFields: () => {
@@ -250,13 +270,16 @@ const controller = ((budgetCtrl, UICtrl) => {
 
             splitID = itemID.split('-');
             type = splitID[0];
-            ID = splitID[1];
+            ID = parseInt(splitID[1]);
             
             //delete item
+            budgetController.deleteItem(type, ID);
 
             //delete item from the UI
+             UICtrl.deleteListItem(itemID);
 
             //update the new budget
+            updateBudget();
 
         }
      };
