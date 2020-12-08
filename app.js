@@ -108,7 +108,8 @@ const UIcontroller = (() => {
         budgetLabel: '.budget__value',
         incomeLabel: '.budget__income--value',
         expenseLabel: '.budget__expenses--value',
-        procentageLabel: '.budget__expenses--percentage'
+        procentageLabel: '.budget__expenses--percentage',
+        container: '.container'
     };
 
     return {
@@ -128,14 +129,14 @@ const UIcontroller = (() => {
             if(type === 'inc') {
                 
                 element = DOMstrings.incomeContainer;
-                html = `<div class="item clearfix" id="income-%0%"> <div class="item__description">%description%</div> <div class="right clearfix">
+                html = `<div class="item clearfix" id="inc-%id%"> <div class="item__description">%description%</div> <div class="right clearfix">
                 <div class="item__value">%value%</div> <div class="item__delete"> <button class="item__delete--btn"><i class="ion-ios-close-outline">
                 </i></i></button> </div> </div> </div>`
 
             } else if(type === 'exp') {
 
                 element = DOMstrings.expensesContainer;
-                html = `<div class="item clearfix" id="expense-%0%"><div class="item__description">%description%</div><div class="right clearfix">
+                html = `<div class="item clearfix" id="exp-%id%"><div class="item__description">%description%</div><div class="right clearfix">
                 <div class="item__value">%value%</div><div class="item__percentage">21%</div> <div class="item__delete">
                 <button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div> </div>`
             }
@@ -200,6 +201,9 @@ const controller = ((budgetCtrl, UICtrl) => {
  
         });
 
+        document.querySelector(DOM.container).addEventListener('click', ctrlDeleteItem);
+
+
     };
 
     const updateBudget = () => {
@@ -235,7 +239,27 @@ const controller = ((budgetCtrl, UICtrl) => {
 
         }
 
-     }
+     };
+
+     const ctrlDeleteItem = (event) => {
+         let itemID, splitID, type, ID;
+
+        itemID = event.target.parentNode.parentNode.parentNode.parentNode.id;
+
+        if (itemID) {
+
+            splitID = itemID.split('-');
+            type = splitID[0];
+            ID = splitID[1];
+            
+            //delete item
+
+            //delete item from the UI
+
+            //update the new budget
+
+        }
+     };
 
      return {
          init: () => {
